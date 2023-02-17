@@ -31,6 +31,7 @@ func main() {
 	}
 
 	var currentWifiName string
+	var agh *os.Process
 
 	cfg, err := NewConfig(flgConfig)
 	if err != nil {
@@ -54,7 +55,6 @@ func main() {
 
 			return
 		}
-
 		log.Debug(wifi)
 
 		// Check if dns interface is set
@@ -70,6 +70,15 @@ func main() {
 				log.Error(err)
 				return
 			}
+		}
+
+		if agh == nil {
+			agh, err = runAdGuardHome()
+			if err != nil {
+				log.Fatal(err)
+			}
+			log.Info("AdGuardHome started")
+			log.Debugf("AdGuardHome process ID is %d", agh.Pid)
 		}
 
 		// Update Adguardhome
@@ -105,6 +114,8 @@ func main() {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
 	<-quit
+
+	agh.Kill()
 
 	ticker.Stop()
 	done <- true
