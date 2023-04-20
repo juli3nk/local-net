@@ -70,7 +70,7 @@ func (c *dnsCfg) GetDnsConfig() (*DnsConfig, error) {
 	defer response.Body.Close()
 
 	if response.StatusCode != 200 {
-		return nil, fmt.Errorf("Please contact an administrator if the problem persists (status code %d)", response.StatusCode)
+		return nil, fmt.Errorf("Please contact an administrator if the problem persists (method: GetDnsConfig, status code: %d)", response.StatusCode)
 	}
 
 	respBody, err := io.ReadAll(response.Body)
@@ -119,7 +119,7 @@ func (c *dnsCfg) SaveDnsConfig(body *DnsConfig) error {
 	defer response.Body.Close()
 
 	if response.StatusCode != 200 {
-		return fmt.Errorf("Please contact an administrator if the problem persists (status code %d)", response.StatusCode)
+		return fmt.Errorf("Please contact an administrator if the problem persists (method: SaveDnsConfig, status code: %d)", response.StatusCode)
 	}
 
 	return nil

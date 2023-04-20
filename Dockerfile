@@ -7,12 +7,13 @@ COPY get-adguardhome.sh /tmp/
 RUN apk --update --no-cache add \
 	bash \
 	curl \
+	git \
 	tar
 
-RUN /tmp/get-adguardhome.sh
+RUN /tmp/get-adguardhome.sh $ADGUARDHOME_VERSION
 
 
-FROM golang:1.17-alpine3.14 AS builder
+FROM golang:1-alpine AS builder
 
 RUN apk --update add \
 		ca-certificates \
@@ -33,7 +34,7 @@ RUN go build -ldflags "-linkmode external -extldflags -static -s -w" -o /tmp/loc
 FROM alpine
 
 RUN apk --update --no-cache add \
-	networkmanager
+	networkmanager-cli
 
 COPY --from=adguardhome /usr/local/bin/AdGuardHome /usr/local/bin/
 COPY --from=builder /tmp/local-dns /usr/local/bin/

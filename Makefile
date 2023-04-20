@@ -4,13 +4,11 @@ IMAGE_NAME := juli3nk/local-dns
 
 .PHONY: dev
 dev:
-	docker container run -ti \
+	docker container run \
+		-ti \
 		--rm \
 		--mount type=bind,src=$$PWD,dst=${REPODIR} \
 		--mount type=bind,src=/var/run/dbus,dst=/var/run/dbus \
-		--mount type=bind,src=$$HOME/Data/local-dns/local-dns.yml,dst=/tmp/local-dns.yml,ro \
-    --mount type=bind,src=$$HOME/Data/adguardhome/work,dst=/opt/adguardhome/work \
-    --mount type=bind,src=$$HOME/Data/adguardhome/conf,dst=/opt/adguardhome/conf \
 		--net host \
 		--dns 1.1.1.1 \
 		--cap-add=NET_ADMIN \
@@ -21,16 +19,17 @@ dev:
 .PHONY: build
 build:
 	docker image build \
-		-t juli3nk/local-dns \
+		-t ${IMAGE_NAME} \
 		.
 
 .PHONY: run
 run:
+	@mkdir -p $$HOME/Data/adguardhome/{work,conf}
 	docker container run \
 		-d \
 		--rm \
 		--mount type=bind,src=/var/run/dbus,dst=/var/run/dbus \
-		--mount type=bind,src=$$HOME/Data/local-dns/local-dns.yml,dst=/tmp/local-dns.yml \
+		--mount type=bind,src=$$HOME/.config/local-dns/config.yml,dst=/tmp/local-dns.yml \
 		--mount type=bind,src=$$HOME/Data/adguardhome/work,dst=/opt/adguardhome/work \
 		--mount type=bind,src=$$HOME/Data/adguardhome/conf,dst=/opt/adguardhome/conf \
 		--net host \
