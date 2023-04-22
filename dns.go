@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
-	"github.com/juli3nk/local-dns/pkg/adguardhome"
-	"github.com/juli3nk/local-dns/pkg/dns"
-	"github.com/juli3nk/local-dns/pkg/nmcli"
+	"github.com/juli3nk/local-net/pkg/adguardhome"
+	"github.com/juli3nk/local-net/pkg/dns"
+	"github.com/juli3nk/local-net/pkg/nmcli"
 	"github.com/thoas/go-funk"
 )
 

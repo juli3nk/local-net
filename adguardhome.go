@@ -6,7 +6,7 @@ import (
 	"os/exec"
 )
 
-func runAdGuardHome() (*os.Process, error) {
+func runAdGuardHome(listenIPAddr) (*os.Process, error) {
 	dataPath := "/opt/adguardhome"
 
 	args := []string{
@@ -15,7 +15,7 @@ func runAdGuardHome() (*os.Process, error) {
 		"-w",
 		fmt.Sprintf("%s/work", dataPath),
 		"-h",
-		"192.168.82.1",
+		listenIPAddr,
 	}
 
 	cmd := exec.Command("/usr/local/bin/AdGuardHome", args...)

@@ -1,4 +1,4 @@
-# Local DNS
+# Local Net
 
 Config example
 
@@ -20,4 +20,4 @@ dns_servers:
   - '9.9.9.9'
 ```
 
-http://192.168.82.1:3000
+http://192.168.10.1:3000
