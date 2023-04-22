@@ -6,62 +6,84 @@ import (
 	"github.com/juli3nk/local-net/pkg/adguardhome"
 	"github.com/juli3nk/local-net/pkg/dns"
 	"github.com/juli3nk/local-net/pkg/nmcli"
-	"github.com/thoas/go-funk"
+	"github.com/rs/zerolog/log"
 )
 
-func setDns(cfg *Config, wifi *nmcli.Wifi) (*string, error) {
-	// Get DNS IP
-	var dnsIP string
+func testDns(servers []string) []string {
+	var result []string
 
-	if cfg.Home.WifiName == wifi.Name {
-		dnsIP = cfg.Home.DnsServer
+	for _, s := range servers {
+		err := dns.ServerRespond("github.com", s)
+		if err != nil {
+			log.Error().Err(err).Send()
+		}
+		if err == nil {
+			result = append(result, s)
+		}
 	}
 
-	// check if dns server is reachable
-	if len(dnsIP) == 0 {
-		for _, s := range cfg.DnsServers {
-			err := dns.ServerRespond("github.com", s)
-			if err != nil {
-				fmt.Println(err)
-			}
-			if err == nil {
-				dnsIP = s
+	return result
+}
 
-				break
+func setDnsUpstreamServers(cfgDns *Dns, aghcli *adguardhome.DnsCfg, wifiTrusted bool, wifiUuid, vpnUuid string) ([]string, error) {
+	var dnsServers []string
+
+	// Get upstream dns servers
+	// vpn connected
+	if vpnUuid != "" {
+		ds, err := nmcli.GetConnectionDhcpDns(vpnUuid)
+		if err == nil {
+			result := testDns(ds)
+			if len(result) > 0 {
+				dnsServers = result
 			}
+		}
+	}
+
+	// wifi trusted
+	if wifiTrusted {
+		ds, err := nmcli.GetConnectionDhcpDns(wifiUuid)
+		if err == nil {
+			result := testDns(ds)
+			if len(result) > 0 {
+				dnsServers = result
+			}
+		}
+	}
+
+	// default
+	if len(dnsServers) == 0 {
+		result := testDns(cfgDns.UpstreamServers.Default)
+		if len(result) > 0 {
+			dnsServers = result
 		}
 	}
 
 	// otherwise get dns ip from dhcp
-	if len(dnsIP) == 0 {
-		ip, err := nmcli.GetDhcpDnsIP(wifi.Uuid)
+	if len(dnsServers) == 0 {
+		ds, err := nmcli.GetConnectionDhcpDns(wifiUuid)
 		if err == nil {
-			dnsIP = ip
+			result := testDns(ds)
+			if len(result) > 0 {
+				dnsServers = result
+			}
 		}
 	}
 
-	if len(dnsIP) == 0 {
-		return nil, fmt.Errorf("no dns ip available")
+	if len(dnsServers) == 0 {
+		return nil, fmt.Errorf("no dns server available")
 	}
 
-	// set dns ip
-	d, err := adguardhome.New(cfg.DnsProvider.Url, cfg.DnsProvider.Username, cfg.DnsProvider.Password)
+	// Set dns ip
+	dnsConfig, err := aghcli.GetDnsConfig()
 	if err != nil {
 		return nil, err
 	}
+	dnsConfig.UpstreamDns = dnsServers
 
-	dnsConfig, err := d.GetDnsConfig()
-	if err != nil {
+	if err := aghcli.SaveDnsConfig(dnsConfig); err != nil {
 		return nil, err
 	}
 
-	if !funk.Contains(dnsConfig.UpstreamDns, dnsIP) {
-		dnsConfig.UpstreamDns = []string{dnsIP}
-
-		if err := d.SaveDnsConfig(dnsConfig); err != nil {
-			return nil, err
-		}
-	}
-
-	return &dnsIP, nil
+	return dnsServers, nil
 }

@@ -4,19 +4,32 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path"
+	"path/filepath"
+
+	log "github.com/sirupsen/logrus"
 )
 
-func runAdGuardHome(listenIPAddr) (*os.Process, error) {
+func runAdGuardHome(listenIPAddr string) (*os.Process, error) {
 	dataPath := "/opt/adguardhome"
+	confDir := path.Join(dataPath, "conf")
+	workDir := path.Join(dataPath, "work")
+
+	configFile := filepath.Join(confDir, "AdGuardHome.yaml")
+
+	if !DirExists(confDir) {
+		return nil, fmt.Errorf("directory %s does not exist", confDir)
+	}
+	if !DirExists(workDir) {
+		return nil, fmt.Errorf("directory %s does not exist", workDir)
+	}
 
 	args := []string{
-		"-c",
-		fmt.Sprintf("%s/conf/AdGuardHome.yaml", dataPath),
-		"-w",
-		fmt.Sprintf("%s/work", dataPath),
-		"-h",
-		listenIPAddr,
+		"-c", configFile,
+		"-w", workDir,
+		"-h", listenIPAddr,
 	}
+	log.Debug(args)
 
 	cmd := exec.Command("/usr/local/bin/AdGuardHome", args...)
 

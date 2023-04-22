@@ -4,20 +4,31 @@ Config example
 
 ```yaml
 ---
-nic:
-  label: 'dns'
-  ip_address: '192.168.10.1'
-  netmask: '255.255.255.0'
-home:
-  wifi_name: 'HomeWifi'
-  dns_server: '192.168.1.1'
-dns_provider:
-  url: 'http://192.168.10.1'
-  username: 'admin'
-  password: 'admin'
-dns_servers:
-  - '1.1.1.1'
-  - '9.9.9.9'
+addresses:
+  dns:
+    ip_address: '192.168.10.1'
+    netmask: '255.255.255.0'
+  http:
+    ip_address: '192.168.10.2'
+    netmask: '255.255.255.0'
+trusted:
+  home: 'HomeWifi'
+  phone: 'PhoneWifi'
+vpn:
+  enable: true
+  name: 'vpn1'
+dns:
+  enable: true
+  credentials:
+    username: 'admin'
+    password: 'admin'
+  upstream_servers:
+    default:
+      - '1.1.1.1'
+      - '9.9.9.9'
+  container:
+    enable: true
+    label_name: 'dns.record'
 ```
 
 http://192.168.10.1:3000

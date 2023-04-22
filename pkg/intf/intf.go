@@ -10,16 +10,12 @@ func Get() error {
 	if err != nil {
 		return err
 	}
-	//iface, _ := net.InterfaceByName("enp1s0")
 
 	for _, i := range ifaces {
-		fmt.Printf("%+v\n", i)
-
 		addrs, err := i.Addrs()
 		if err != nil {
 			return err
 		}
-		fmt.Printf("%+v\n", addrs)
 
 		for _, addr := range addrs {
 			var ip net.IP
@@ -35,10 +31,8 @@ func Get() error {
 				*/
 				ip = v.IP
 			case *net.IPAddr:
-							ip = v.IP
+				ip = v.IP
 			}
-
-			fmt.Println(ip)
 		}
 	}
 
