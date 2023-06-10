@@ -32,7 +32,7 @@ run:
 		--rm \
 		--mount type=bind,src=/var/run/dbus,dst=/var/run/dbus \
 		--mount type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock \
-		--mount type=bind,src=$$HOME/.config/local/net.yml,dst=/tmp/local-net.yml \
+		--mount type=bind,src=$$HOME/.config/local/net.json,dst=/tmp/local-net.json \
 		--mount type=bind,src=$$HOME/Data/adguardhome/work,dst=/opt/adguardhome/work \
 		--mount type=bind,src=$$HOME/Data/adguardhome/conf,dst=/opt/adguardhome/conf \
 		--net host \

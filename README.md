@@ -31,4 +31,4 @@ dns:
     label_name: 'dns.record'
 ```
 
-http://192.168.10.1:3000
+The first time AdGuardhome needs to be configured at the following address: `http://192.168.10.1:3000`.

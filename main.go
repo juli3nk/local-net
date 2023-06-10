@@ -25,7 +25,7 @@ var (
 )
 
 func init() {
-	flag.StringVar(&flgConfig, "config", "/tmp/local-net.yml", "config file path")
+	flag.StringVar(&flgConfig, "config", "/tmp/local-net.json", "config file path")
 	flag.BoolVar(&flgDebug, "debug", false, "enable debug log")
 	flag.IntVar(&flgInterval, "interval", 30, "interval between probing")
 

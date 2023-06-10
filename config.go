@@ -1,56 +1,55 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
-
-	"gopkg.in/yaml.v2"
 )
 
 type Config struct {
-	IpAddresses map[string]IpAddress `yaml:"ip_addresses"`
-	Trusted   map[string]string  `yaml:"trusted"`
-	Vpn       Vpn                `yaml:"vpn"`
-	Dns       Dns                `yaml:"dns"`
+	IpAddresses map[string]IpAddress `json:"ip_addresses"`
+	Trusted   map[string]string  `json:"trusted"`
+	Vpn       Vpn                `json:"vpn"`
+	Dns       Dns                `json:"dns"`
 }
 
 type IpAddress struct {
-	IpAddress string `yaml:"ip_address"`
-	Netmask   string `yaml:"netmask"`
+	IpAddress string `json:"ip_address"`
+	Netmask   string `json:"netmask"`
 }
 
 type Vpn struct {
-	Enable bool   `yaml:"enable"`
-	Name   string `yaml:"name"`
+	Enable bool   `json:"enable"`
+	Name   string `json:"name"`
 }
 
 type Dns struct {
-	Enable          bool            `yaml:"enable"`
-	Credentials     Credentials     `yaml:"credentials"`
-	UpstreamServers UpstreamServers `yaml:"upstream_servers"`
-	Container       Container       `yaml:"container"`
+	Enable          bool            `json:"enable"`
+	Credentials     Credentials     `json:"credentials"`
+	UpstreamServers UpstreamServers `json:"upstream_servers"`
+	Container       Container       `json:"container"`
 }
 
 type Credentials struct {
-	Url      string `yaml:"url"`
-	Username string `yaml:"username"`
-	Password string `yaml:"password"`
+	Url      string `json:"url"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 type UpstreamServers struct {
-	Default   []string            `yaml:"default"`
-	locations map[string]Location `yaml:"locations"`
+	Default   []string            `json:"default"`
+	locations map[string]Location `json:"locations"`
 }
 
 type Location struct {
-	WifiName string `yaml:"wifi_name"`
-	Server   string `yaml:"dns_server"`
+	WifiName string `json:"wifi_name"`
+	Server   string `json:"dns_server"`
 }
 
 type Container struct {
-	Enable    bool   `yaml:"enable"`
-	LabelDomain string `yaml:"label_domain"`
-	LabelAnswer string `yaml:"label_answer"`
+	Enable    bool   `json:"enable"`
+	LabelDomain string `json:"label_domain"`
+	LabelAnswer string `json:"label_answer"`
 }
 
 func NewConfig(filename string) (*Config, error) {
@@ -65,7 +64,7 @@ func NewConfig(filename string) (*Config, error) {
 
 	config := new(Config)
 
-	if err = yaml.Unmarshal(data, config); err != nil {
+	if err = json.Unmarshal(data, config); err != nil {
 		return nil, err
 	}
 
