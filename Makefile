@@ -12,6 +12,8 @@ dev:
 		--mount type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock \
 		--net host \
 		--dns 1.1.1.1 \
+		--security-opt seccomp=unconfined \
+		--security-opt apparmor=unconfined \
 		--cap-add=NET_ADMIN \
 		--env DOCKER_API_VERSION=1.41 \
 		--workdir ${REPODIR} \
@@ -37,6 +39,8 @@ run:
 		--mount type=bind,src=$$HOME/Data/adguardhome/conf,dst=/opt/adguardhome/conf \
 		--net host \
 		--dns 1.1.1.1 \
+		--security-opt seccomp=unconfined \
+		--security-opt apparmor=unconfined \
 		--cap-add=NET_ADMIN \
 		--env DOCKER_API_VERSION=1.41 \
 		--name local-net \

@@ -3,9 +3,10 @@ package main
 import (
 	"fmt"
 
-	"github.com/juli3nk/local-net/pkg/adguardhome"
-	"github.com/juli3nk/local-net/pkg/dns"
-	"github.com/juli3nk/local-net/pkg/nmcli"
+	"github.com/juli3nk/go-adguardhome"
+	"github.com/juli3nk/go-network/dns"
+	"github.com/juli3nk/go-network/nmcli"
+	"github.com/juli3nk/local-net/pkg/config"
 	"github.com/rs/zerolog/log"
 )
 
@@ -25,7 +26,7 @@ func testDns(servers []string) []string {
 	return result
 }
 
-func setDnsUpstreamServers(cfgDns *Dns, aghcli *adguardhome.DnsCfg, wifiTrusted bool, wifiUuid, vpnUuid string) ([]string, error) {
+func setDnsUpstreamServers(cfgDns *config.Dns, aghcli *adguardhome.DnsCfg, wifiTrusted bool, wifiUuid, vpnUuid string) ([]string, error) {
 	var dnsServers []string
 
 	// Get upstream dns servers

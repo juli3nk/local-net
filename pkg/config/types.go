@@ -1,15 +1,10 @@
-package main
-
-import (
-	"encoding/json"
-	"fmt"
-	"os"
-)
+package config
 
 type Config struct {
 	IpAddresses map[string]IpAddress `json:"ip_addresses"`
-	Trusted   map[string]string  `json:"trusted"`
+	Wifi   map[string]string  `json:"wifi"`
 	Vpn       Vpn                `json:"vpn"`
+	Domain    string                `json:"domain"`
 	Dns       Dns                `json:"dns"`
 }
 
@@ -50,27 +45,4 @@ type Container struct {
 	Enable    bool   `json:"enable"`
 	LabelDomain string `json:"label_domain"`
 	LabelAnswer string `json:"label_answer"`
-}
-
-func NewConfig(filename string) (*Config, error) {
-	if _, err := os.Lstat(filename); err != nil {
-		return nil, err
-	}
-
-	data, err := os.ReadFile(filename)
-	if err != nil {
-		return nil, err
-	}
-
-	config := new(Config)
-
-	if err = json.Unmarshal(data, config); err != nil {
-		return nil, err
-	}
-
-	if _, ok := config.IpAddresses["dns"]; !ok {
-		return nil, fmt.Errorf("no address with label dns")
-	}
-
-	return config, nil
 }

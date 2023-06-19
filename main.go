@@ -8,11 +8,12 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/juli3nk/local-net/pkg/adguardhome"
-	"github.com/juli3nk/local-net/pkg/docker"
-	"github.com/juli3nk/local-net/pkg/ip"
-	"github.com/juli3nk/local-net/pkg/nmcli"
 	"github.com/docker/docker/api/types/events"
+	"github.com/juli3nk/go-adguardhome"
+	"github.com/juli3nk/go-docker"
+	"github.com/juli3nk/go-network/ip"
+	"github.com/juli3nk/go-network/nmcli"
+	"github.com/juli3nk/local-net/pkg/config"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/thoas/go-funk"
@@ -43,14 +44,14 @@ func main() {
 	var currentWifiName string
 	var agh *os.Process
 
-	cfg, err := NewConfig(flgConfig)
+	cfg, err := config.New(flgConfig)
 	if err != nil {
 		log.Fatal().Err(err).Send()
 	}
 	log.Print(cfg)
 
 	// Get Wifi device name
-	device, err := nmcli.GetDevice("wifi")
+	device, err := nmcli.DeviceStatus("wifi")
 	if err != nil {
 		log.Fatal().Err(err).Send()
 	}
@@ -81,7 +82,7 @@ func main() {
 
 		// Run dns service
 		if agh == nil {
-			agh, err = runAdGuardHome(cfg.IpAddresses["dns"].IpAddress)
+			agh, err = adguardhome.Run(cfg.IpAddresses["dns"].IpAddress)
 			if err != nil {
 				log.Error().Err(err).Send()
 				return
@@ -95,7 +96,7 @@ func main() {
 		var vpn *nmcli.Connection
 
 		// Check wifi connection
-		wifi, err := nmcli.GetConnection("wifi", "")
+		wifi, err := nmcli.ConnectionShow("wifi", "")
 		if err != nil {
 			currentWifiName = ""
 
@@ -103,10 +104,35 @@ func main() {
 			return
 		}
 
+		wifiTrusted := cfg.IsWifiTrusted(wifi.Name)
+
+		// Check vpn connection
+		if cfg.Vpn.Enable {
+			vpn, err = nmcli.ConnectionShow("vpn", cfg.Vpn.Name)
+			if err != nil {
+				log.Error().Err(err).Send()
+				return
+			}
+		} else {
+			log.Debug().Msg("vpn is not enabled")
+		}
+
+		// Check if vpn needs to be disconnected
+		if wifi == nil || wifiTrusted {
+			if vpn != nil && vpn.Device != "" {
+				if err := nmcli.ConnectionDown(cfg.Vpn.Name); err != nil {
+					log.Error().Err(err).Send()
+					return
+				}
+				log.Info().Msgf("disconnected vpn %s", cfg.Vpn.Name)
+			}
+		}
+
 		if wifi == nil {
 			currentWifiName = ""
 
 			log.Info().Msg("wifi not connected")
+
 			return
 		}
 		log.Print(wifi)
@@ -115,27 +141,14 @@ func main() {
 			return
 		}
 
-		wifiTrusted := isWifiTrusted(cfg.Trusted, wifi.Name)
-
-		// Connect to vpn if not trusted wifi
+		// Connect to vpn if wifi is not trusted
 		if !wifiTrusted {
-			if cfg.Vpn.Enable {
-				vpn, err = nmcli.GetConnection("vpn", cfg.Vpn.Name)
-				if err != nil {
+			if vpn.Device == "" {
+				if err := nmcli.ConnectionUp(cfg.Vpn.Name); err != nil {
 					log.Error().Err(err).Send()
 					return
 				}
-
-				if vpn == nil {
-					if err := nmcli.UpConnection(cfg.Vpn.Name); err != nil {
-						log.Error().Err(err).Send()
-						return
-					}
-					log.Info().Msgf("connected to vpn %s", cfg.Vpn.Name)
-				}
-				log.Print(wifi)
-			} else {
-				log.Debug().Msg("vpn is not enabled")
+				log.Info().Msgf("connected to vpn %s", cfg.Vpn.Name)
 			}
 		}
 
