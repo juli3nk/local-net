@@ -30,8 +30,8 @@ func New(filename string) (*Config, error) {
 }
 
 func (c *Config) IsWifiTrusted(wifiName string) bool {
-	for _, wt := range c.Wifi {
-		if wt == wifiName {
+	for _, name := range c.Wifi {
+		if name == wifiName {
 			return true
 		}
 	}

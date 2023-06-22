@@ -2,10 +2,10 @@ package config
 
 type Config struct {
 	IpAddresses map[string]IpAddress `json:"ip_addresses"`
-	Wifi   map[string]string  `json:"wifi"`
-	Vpn       Vpn                `json:"vpn"`
-	Domain    string                `json:"domain"`
-	Dns       Dns                `json:"dns"`
+	Wifi        map[string]string    `json:"wifi"`
+	Vpn         Vpn                  `json:"vpn"`
+	Domain      string               `json:"domain"`
+	Dns         Dns                  `json:"dns"`
 }
 
 type IpAddress struct {
@@ -15,6 +15,7 @@ type IpAddress struct {
 
 type Vpn struct {
 	Enable bool   `json:"enable"`
+	Type   string `json:"type"`
 	Name   string `json:"name"`
 }
 
@@ -42,7 +43,7 @@ type Location struct {
 }
 
 type Container struct {
-	Enable    bool   `json:"enable"`
+	Enable      bool   `json:"enable"`
 	LabelDomain string `json:"label_domain"`
 	LabelAnswer string `json:"label_answer"`
 }

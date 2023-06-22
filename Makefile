@@ -23,6 +23,7 @@ dev:
 .PHONY: build
 build:
 	docker image build \
+		--no-cache \
 		-t ${IMAGE_NAME} \
 		.
 

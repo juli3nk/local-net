@@ -74,7 +74,7 @@ func main() {
 				log.Info().Msgf("set %s ip address", label)
 
 				if err := i.Set(); err != nil {
-					log.Error().Err(err).Send()
+					log.Error().Str("id", "ip-set").Err(err).Send()
 					return
 				}
 			}
@@ -84,7 +84,7 @@ func main() {
 		if agh == nil {
 			agh, err = adguardhome.Run(cfg.IpAddresses["dns"].IpAddress)
 			if err != nil {
-				log.Error().Err(err).Send()
+				log.Error().Str("id", "dns-run").Err(err).Send()
 				return
 			}
 
@@ -100,32 +100,8 @@ func main() {
 		if err != nil {
 			currentWifiName = ""
 
-			log.Error().Err(err).Send()
+			log.Error().Str("id", "wifi-conn-check").Err(err).Send()
 			return
-		}
-
-		wifiTrusted := cfg.IsWifiTrusted(wifi.Name)
-
-		// Check vpn connection
-		if cfg.Vpn.Enable {
-			vpn, err = nmcli.ConnectionShow("vpn", cfg.Vpn.Name)
-			if err != nil {
-				log.Error().Err(err).Send()
-				return
-			}
-		} else {
-			log.Debug().Msg("vpn is not enabled")
-		}
-
-		// Check if vpn needs to be disconnected
-		if wifi == nil || wifiTrusted {
-			if vpn != nil && vpn.Device != "" {
-				if err := nmcli.ConnectionDown(cfg.Vpn.Name); err != nil {
-					log.Error().Err(err).Send()
-					return
-				}
-				log.Info().Msgf("disconnected vpn %s", cfg.Vpn.Name)
-			}
 		}
 
 		if wifi == nil {
@@ -141,11 +117,36 @@ func main() {
 			return
 		}
 
+		wifiTrusted := cfg.IsWifiTrusted(wifi.Name)
+		log.Debug().Any("wifi-trust", wifiTrusted).Send()
+
+		// Check vpn connection
+		if cfg.Vpn.Enable {
+			vpn, err = nmcli.ConnectionShow(cfg.Vpn.Type, cfg.Vpn.Name)
+			if err == nil {
+				log.Error().Str("id", "vpn-conn-check").Err(err).Send()
+			}
+		} else {
+			log.Debug().Msg("vpn is not enabled")
+		}
+		log.Print(vpn)
+
+		// Check if vpn needs to be disconnected
+		if wifi == nil || wifiTrusted {
+			if vpn != nil && vpn.Device != "" {
+				if err := nmcli.ConnectionDown(cfg.Vpn.Name); err != nil {
+					log.Error().Str("id", "vpn-disconn").Err(err).Send()
+					return
+				}
+				log.Info().Msgf("disconnected vpn %s", cfg.Vpn.Name)
+			}
+		}
+
 		// Connect to vpn if wifi is not trusted
 		if !wifiTrusted {
-			if vpn.Device == "" {
+			if vpn == nil {
 				if err := nmcli.ConnectionUp(cfg.Vpn.Name); err != nil {
-					log.Error().Err(err).Send()
+					log.Error().Str("id", "vpn-conn-wifi-no-trust").Err(err).Send()
 					return
 				}
 				log.Info().Msgf("connected to vpn %s", cfg.Vpn.Name)
@@ -161,7 +162,7 @@ func main() {
 
 		dnsServers, err := setDnsUpstreamServers(&cfg.Dns, aghcli, wifiTrusted, wifi.Uuid, vpnUuid)
 		if err != nil {
-			log.Error().Err(err).Send()
+			log.Error().Str("id", "dns-upstream-update").Err(err).Send()
 
 			return
 		}
@@ -210,7 +211,7 @@ func main() {
 				select {
 				case err := <-errs:
 					if err != nil && err != io.EOF {
-						log.Error().Err(err).Send()
+						log.Error().Str("id", "container-event").Err(err).Send()
 					}
 
 					os.Exit(1)
@@ -231,10 +232,10 @@ func main() {
 					}
 
 					/*
-					if err = validation.IsValidFQDN(domain); err != nil {
-						log.Error(err)
-						continue
-					}
+						if err = validation.IsValidFQDN(domain); err != nil {
+							log.Error(err)
+							continue
+						}
 					*/
 
 					record := adguardhome.Record{
@@ -244,7 +245,7 @@ func main() {
 
 					if e.Status == "create" {
 						if err := aghcli.RewriteAdd(&record); err != nil {
-							log.Error().Err(err).Send()
+							log.Error().Str("id", "container-event-create").Err(err).Send()
 							return
 						}
 
@@ -257,7 +258,7 @@ func main() {
 
 					if e.Status == "destroy" {
 						if err := aghcli.RewriteDelete(&record); err != nil {
-							log.Error().Err(err).Send()
+							log.Error().Str("id", "container-event-destroy").Err(err).Send()
 							return
 						}
 
