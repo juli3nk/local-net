@@ -28,7 +28,7 @@ var (
 func init() {
 	flag.StringVar(&flgConfig, "config", "/tmp/local-net.json", "config file path")
 	flag.BoolVar(&flgDebug, "debug", false, "enable debug log")
-	flag.IntVar(&flgInterval, "interval", 30, "interval between probing")
+	flag.IntVar(&flgInterval, "interval", 30, "interval between probing in seconds")
 
 	flag.Parse()
 }
@@ -61,6 +61,11 @@ func main() {
 	if err != nil {
 		log.Fatal().Err(err).Send()
 	}
+
+    // Firewall init
+    if err := fwInit(); err != nil {
+		log.Fatal().Err(err).Send()
+    }
 
 	probe := func() {
 		// Check if addresses are set

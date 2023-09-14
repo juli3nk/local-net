@@ -1,6 +1,13 @@
 # Local Net
 
-Config example
+wifi
+vpn
+
+dns
+
+https://ip.me
+
+## Config example
 
 ```yaml
 ---

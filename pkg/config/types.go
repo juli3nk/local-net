@@ -22,7 +22,6 @@ type Vpn struct {
 type Dns struct {
 	Enable          bool            `json:"enable"`
 	Credentials     Credentials     `json:"credentials"`
-	UpstreamServers UpstreamServers `json:"upstream_servers"`
 	Container       Container       `json:"container"`
 }
 
@@ -30,11 +29,6 @@ type Credentials struct {
 	Url      string `json:"url"`
 	Username string `json:"username"`
 	Password string `json:"password"`
-}
-
-type UpstreamServers struct {
-	Default   []string            `json:"default"`
-	locations map[string]Location `json:"locations"`
 }
 
 type Location struct {
