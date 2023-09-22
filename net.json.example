@@ -1,0 +1,43 @@
+{
+	"ip_addresses": {
+		"dns": {
+			"ip_address": "192.168.X.1",
+			"netmask": "255.255.255.0"
+		},
+		"ca": {
+			"ip_address": "192.168.X.2",
+			"netmask": "255.255.255.0"
+		},
+		"cloud": {
+			"ip_address": "192.168.X.3",
+			"netmask": "255.255.255.0"
+		}
+	},
+	"wifi": {
+		"home": "<HOME_WIFI>",
+		"phone": "<PHONE_WIFI>"
+	},
+	"vpn": {
+		"enable": true,
+		"name": "<VPN_NAME>"
+	},
+	"domain": "<NAME>.local",
+	"dns": {
+		"enable": true,
+		"credentials": {
+			"username": "admin",
+			"password": "admin01%"
+		},
+		"upstream_servers": {
+			"default": [
+				"1.1.1.1",
+				"9.9.9.9"
+			]
+		},
+		"container": {
+			"enable": true,
+			"label_domain": "dns.domain",
+			"label_answer": "dns.answer"
+		}
+	}
+}
