@@ -1,40 +1,59 @@
 package config
 
 import (
-	"encoding/json"
-	"fmt"
-	"os"
+  "encoding/json"
+  "fmt"
+  "os"
 )
 
 func New(filename string) (*Config, error) {
-	if _, err := os.Lstat(filename); err != nil {
-		return nil, err
-	}
+  config := new(Config)
 
-	data, err := os.ReadFile(filename)
-	if err != nil {
-		return nil, err
-	}
+  if err := config.ReadFile(filename); err != nil {
+    return nil, err
+  }
 
-	config := new(Config)
+  // Check that ip aliases all have the same network addr
+  // Check if ip aliases are already set
+  // If ip aliases are not yet set, make sure they don't respond to ping
 
-	if err = json.Unmarshal(data, config); err != nil {
-		return nil, err
-	}
+  if _, ok := config.IpAddresses["dns"]; !ok {
+    return nil, fmt.Errorf("no address with label dns")
+  }
 
-	if _, ok := config.IpAddresses["dns"]; !ok {
-		return nil, fmt.Errorf("no address with label dns")
-	}
+  // If vpn enabled, check that connection name exists
 
-	return config, nil
+  return config, nil
 }
 
-func (c *Config) IsWifiTrusted(wifiName string) bool {
-	for _, name := range c.Wifi {
-		if name == wifiName {
-			return true
-		}
-	}
+func (c *Config) ReadFile(filename string) error {
+  if _, err := os.Lstat(filename); err != nil {
+    return err
+  }
 
-	return false
+  data, err := os.ReadFile(filename)
+  if err != nil {
+    return err
+  }
+
+  if err = json.Unmarshal(data, c); err != nil {
+    return err
+  }
+
+  return nil
+}
+
+/*
+func (c *Config) ValidateIpAddressNetwork() error {
+}
+*/
+
+func (c *Config) IsWifiTrusted(wifiName string) bool {
+  for _, name := range c.Wifi {
+    if name == wifiName {
+      return true
+    }
+  }
+
+  return false
 }
